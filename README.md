@@ -30,7 +30,7 @@ npm run lint
 
 ```bash
 cd ./functions/
-firebase functions:config:get | ac .runtimeconfig.json
+firebase functions:config:get > .runtimeconfig.json
 cd ../
 firebase serve
 ```
