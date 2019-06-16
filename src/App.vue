@@ -9,6 +9,7 @@
     </v-toolbar>
 
     <v-content>
+      <v-btn color="info" v-on:click="stravaAuth">Start with Strava</v-btn>
       <div>{{ userdata }}</div>
     </v-content>
   </v-app>
@@ -28,11 +29,17 @@ export default {
   data() {
     return {
       userdata: '',
+      accessToken: ''
     }
   },
   methods: {
     getStravaAthleteInfo: function(){
-      API.get('/Athlete')
+      const accessToken = this.accessToken
+      API.get('/Athlete', {
+        params: {
+          accessToken
+        }
+      })
       .then((response) => {
         console.log(response);
         this.userdata = response.data;
@@ -40,7 +47,10 @@ export default {
       .catch((error) => {
         console.log(error);
       })
-    }
+    },
+    stravaAuth: function(){
+      axios.get('/stravaAuth')
+    } 
   }
 }
 </script>

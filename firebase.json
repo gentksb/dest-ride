@@ -20,6 +20,10 @@
         "function": "getAthlete"
       },
       {
+        "source": "/stravaAuth",
+        "function": "stravaAuth"
+      },
+      {
         "source": "**",
         "destination": "/index.html"
       }
