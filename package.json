@@ -5,19 +5,21 @@
   "scripts": {
     "serve": "vue-cli-service build & firebase serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "vueserve": "vue-cli-service serve"
   },
   "dependencies": {
     "axios": "^0.19.0",
     "core-js": "^2.6.5",
     "firebase": "^6.2.0",
     "vue": "^2.6.10",
+    "vue-router": "^3.0.3",
     "vuetify": "^1.5.5"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^3.0.1",
     "@vue/cli-plugin-eslint": "^3.0.1",
-    "@vue/cli-service": "^3.0.1",
+    "@vue/cli-service": "^3.8.4",
     "babel-eslint": "^10.0.1",
     "eslint": "^5.16.0",
     "eslint-plugin-vue": "^5.0.0",
