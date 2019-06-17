@@ -1,8 +1,6 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
-const axios = require('axios') //getAthlete
-const passport = require('passport') //stravaAuth
-const StravaStrategy = require('passport-strava').Strategy; //stravaAuth
+const axios = require('axios') 
 
 const app = admin.initializeApp();
 const stravaconfig = {
@@ -10,13 +8,14 @@ const stravaconfig = {
   client_secret : functions.config().strava.clientsecret,
   redirect_uri : functions.config().strava.redirecturi,
   scope : functions.config().strava.scope,
-  targetUrl: functions.config().strava.apiurl
+  token_url: functions.config().strava.tokenurl,
+  auth_url: functions.config().strava.oauthurl
   }
 const makeStravaApiHeader = (accessToken) => {
   return {'Authorization': `Bearer ${accessToken}`}
   }
 const stravaAPI = axios.create({
-  baseURL: functions.config().strava.apiurl ,
+  baseURL: functions.config().strava.apiurl
 })
 
 // // Create and Deploy Your First Cloud Functions
@@ -35,21 +34,39 @@ exports.getAthlete = functions.https.onRequest((request, response) => {
   })
 });
 
-//認証
-passport.use(new StravaStrategy(
-  {
-  clientID: stravaconfig.client_id,
-  clientSecret: stravaconfig.client_secret,
-  callbackURL: stravaconfig.redirect_uri,
-  scope: stravaconfig.scope
-  },
-  (accessToken, refreshToken, profile, cb) => {
-    //ユーザーDBを作るならここで作成
-    console.log(profile)
-    return profile,refreshToken,accessToken
-  }
-));
+exports.listAthleteActivities = functions.https.onRequest((request, response) => {
+  stravaAPI.get('/athlete/activities',{
+    headers: makeStravaApiHeader(request.query.accessToken),
+    params: {
+      
+    }
+  })
+  .then((result) => {
+    console.log(result);
+    return response.send(result.data);
+  })
+  .catch((error) => {
+    console.log(error);
+  })
+});
 
-exports.stravaAuth = functions.https.onRequest(
-  passport.authenticate('strava')
-);
+//認証
+exports.stravaAuth = functions.https.onRequest((request, response) => {
+  response.redirect(`${stravaconfig.auth_url}?client_id=${stravaconfig.client_id}&redirect_uri=${stravaconfig.redirect_uri}&response_type=code&scope=${stravaconfig.scope}`)
+});
+
+exports.stravaAuthCallback = functions.https.onRequest((request, response) => {
+  axios.post(stravaconfig.token_url ,{
+      client_id: stravaconfig.client_id,
+      client_secret: stravaconfig.client_secret,
+      code: request.query['code'],
+      grant_type: 'authorization_code'
+  })
+  .then((result) => {
+    console.log(result.data);
+    return response.send(result.data.access_token);
+  })
+  .catch((error) => {
+    console.log(error);
+  })
+});

@@ -20,6 +20,10 @@
         "function": "getAthlete"
       },
       {
+        "source": "/api/listRecentActivities",
+        "function": "listAthleteActivities"
+      },
+      {
         "source": "/stravaAuth",
         "function": "stravaAuth"
       },

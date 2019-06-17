@@ -29,6 +29,7 @@ export default {
   data() {
     return {
       userdata: '',
+      recentActivities:{},
       accessToken: ''
     }
   },
@@ -43,6 +44,21 @@ export default {
       .then((response) => {
         console.log(response);
         this.userdata = response.data;
+      })
+      .catch((error) => {
+        console.log(error);
+      })
+    },
+    listRecentActivities: function(){
+      const accessToken = this.accessToken
+      API.get('/listRecentActivities',{
+        params:{
+          accessToken
+        }
+      })      
+      .then((response) => {
+        console.log(response);
+        this.recentActivities = response.data;
       })
       .catch((error) => {
         console.log(error);
