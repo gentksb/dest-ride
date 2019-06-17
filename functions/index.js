@@ -64,7 +64,7 @@ exports.stravaAuthCallback = functions.https.onRequest((request, response) => {
   })
   .then((result) => {
     console.log(result.data);
-    return response.send(result.data.access_token);
+    return redirect.send(`/?=${result.data.access_token}`);
   })
   .catch((error) => {
     console.log(error);
