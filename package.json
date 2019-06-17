@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service build & firebase serve",
+    "serve": "vue-cli-service build --mode develop & firebase serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "vueserve": "vue-cli-service serve"
+    "deploy": "vue-cli-service lint & vue-cli-service build & firebase deploy"
   },
   "dependencies": {
     "axios": "^0.19.0",
