@@ -9,8 +9,9 @@
     </v-toolbar>
 
     <v-content>
-      <v-btn color="info" v-on:click="stravaAuth">Start with Strava</v-btn>
+      <a href="./stravaAuth"><img src="./assets/btn_strava_connectwith_orange.svg"></a>
       <div>{{ userdata }}</div>
+      <div><img src="./assets/api_logo_pwrdBy_strava_horiz_light.svg"></div>
     </v-content>
   </v-app>
 </template>

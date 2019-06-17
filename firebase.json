@@ -28,6 +28,10 @@
         "function": "stravaAuth"
       },
       {
+        "source": "/stravaAuthCallback",
+        "function": "stravaAuthCallback"
+      },
+      {
         "source": "**",
         "destination": "/index.html"
       }
