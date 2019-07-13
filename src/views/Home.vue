@@ -15,7 +15,7 @@
           <div class="profile_image">
             <img v-bind:src="userdata.profile_medium">
           </div>
-          You are login as <b>{{ userdata.username }}</b>
+          Login as <b>{{ userdata.username }}</b>
         </div>
         <div class="activitylist">
           <v-btn @click="listRecentActivities" color="info">デストライド可能なアクティビティを取得する</v-btn>
@@ -38,11 +38,16 @@
             <td>Name</td><td>date</td>
           </tr>
           <tr v-for="segment in segmentList" v-bind:key="segment.id">
-            <td>{{segment.name}}</td><td>{{segment.start_date_local}}</td>
+            <td>{{segment.name}}</td><td>{{segment.start_date_local}}</td><td><v-btn @click="deathStride(segment.id,segment.activity.id)">デストライドする</v-btn></td>
           </tr>
         </table>
       </div>
 
+      <div v-if="alartMessage">
+        <v-alert class="alart" type="success" :value="true">
+          {{ alartMessage }}
+        </v-alert>
+      </div>
 
       <div class="poweredby">
         <img src="../assets/api_logo_pwrdBy_strava_horiz_light.svg">
@@ -53,6 +58,7 @@
 
 <script>
 import axios from 'axios'
+import firebase from 'firebase'
 
 const API = axios.create({
   baseURL: '/api/'
@@ -61,7 +67,6 @@ const API = axios.create({
 const destrideSegmentArray = [63488041626];
 
 const isDestrideCourse = (inputSegment) =>{
-  console.log(`判定対象：${inputSegment.id}`)
   return destrideSegmentArray.includes(inputSegment.id)
 }
 
@@ -74,7 +79,8 @@ export default {
       userdata: '',
       recentActivities:{},
       accessToken: '',
-      segmentList: ''
+      segmentList: '',
+      alartMessage: ''
     }
   },
   created: function(){
@@ -125,6 +131,23 @@ export default {
       })      
       .then((response) => {
         this.segmentList = response.data.filter(isDestrideCourse);
+      })
+      .catch((error) => {
+        console.log(error);
+      })
+    },
+    deathStride: function(segmentId,activityId){
+      const accessToken = this.accessToken
+      API.get('/deathStride',{
+        params:{
+          accessToken,
+          segmentId,
+          activityId
+        }
+      })      
+      .then((response) => {
+        console.log(response.data)
+        this.alartMessage = response.data;
       })
       .catch((error) => {
         console.log(error);

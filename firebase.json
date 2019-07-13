@@ -28,6 +28,10 @@
         "function": "getSegmentsOfActivity"
       },
       {
+        "source": "/api/deathStride",
+        "function": "deathStride"
+      },
+      {
         "source": "/stravaAuth",
         "function": "stravaAuth"
       },

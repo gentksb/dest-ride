@@ -1,4 +1,5 @@
 const functions = require('firebase-functions');
+const firebase =require('firebase')
 const admin = require('firebase-admin');
 const axios = require('axios');
 const app = admin.initializeApp();
@@ -33,6 +34,7 @@ exports.getAthlete = functions.https.onRequest((request, response) => {
   })
   .catch((error) => {
     console.log(error);
+    return response.status(500)
   })
 });
 
@@ -49,6 +51,7 @@ exports.getSegmentsOfActivity = functions.https.onRequest((request, response) =>
   })
   .catch((error) => {
     console.log(error);
+    return response.status(500)
   })
 });
 
@@ -66,8 +69,30 @@ exports.listAthleteActivities = functions.https.onRequest((request, response) =>
   })
   .catch((error) => {
     console.log(error);
+    return response.status(500)
   })
 });
+
+exports.deathStride = functions.https.onRequest((request, response) => {
+  //ローカルに渡したデータ書き換え対策のため、比較用タイムを再度取得
+  stravaAPI.get(`/activities/${request.query.activityId}`,{
+    headers: makeStravaApiHeader(request.query.accessToken),
+    params: {
+      include_all_efforts: true
+    }
+  })
+  .then((result) => {
+    const challengersTime = result.data.elapsed_time;
+      //デストライド処理
+    const message = "デストライド完了"
+    return response.status(200).send(message)
+  })
+  .catch((error) => {
+    console.log(error);
+    return response.status(500)
+  })
+});
+
 
 //API認可
 exports.stravaAuth = functions.https.onRequest((request, response) => {
