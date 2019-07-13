@@ -1,7 +1,6 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
-const axios = require('axios') 
-
+const axios = require('axios');
 const app = admin.initializeApp();
 const stravaconfig = {
   client_id : functions.config().strava.clientid,
@@ -19,16 +18,18 @@ const stravaAPI = axios.create({
   baseURL: functions.config().strava.apiurl
 })
 
+
 // // Create and Deploy Your First Cloud Functions
 // // https://firebase.google.com/docs/functions/write-firebase-functions
 //
+
 exports.getAthlete = functions.https.onRequest((request, response) => {
   stravaAPI.get('/athlete',{
     headers: makeStravaApiHeader(request.query.accessToken)
   })
   .then((result) => {
     console.log(result);
-    return response.send(result.data);
+    return response.status(200).send(result.data);
   })
   .catch((error) => {
     console.log(error);
@@ -39,12 +40,14 @@ exports.listAthleteActivities = functions.https.onRequest((request, response) =>
   stravaAPI.get('/athlete/activities',{
     headers: makeStravaApiHeader(request.query.accessToken),
     params: {
-      
+      page:1,
+      per_page:10,
+      access_token: request.query.accessToken
     }
   })
   .then((result) => {
     console.log(result);
-    return response.send(result.data);
+    return response.status(200).send(result.data);
   })
   .catch((error) => {
     console.log(error);

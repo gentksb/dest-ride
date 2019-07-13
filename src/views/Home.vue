@@ -2,16 +2,39 @@
   <v-app>
     <v-toolbar app>
       <v-toolbar-title class="headline text-uppercase">
-        <span class="font-weight-light">Wellcome to 闇ロード界</span>
+        <span class="font-weight-light">Destride web</span>
       </v-toolbar-title>
-      <v-spacer></v-spacer>
-      <v-btn color="info" v-on:click="getStravaAthleteInfo">Get your Strava Info!</v-btn>
     </v-toolbar>
 
     <v-content>
-      <a href="../stravaAuth"><img src="../assets/btn_strava_connectwith_orange.svg"></a>
-      <div>{{ userdata }}</div>
-      <div><img src="../assets/api_logo_pwrdBy_strava_horiz_light.svg"></div>
+      <div v-if="!userdata">
+        <a href="../stravaAuth"><img src="../assets/btn_strava_connectwith_orange.svg"></a>
+      </div>
+      <div class="main_block" v-else>
+        <div class="profile_box">
+          <div class="profile_image">
+            <img v-bind:src="userdata.profile_medium">
+          </div>
+          You are login as <b>{{ userdata.username }}</b>
+        </div>
+        <div class="activitylist">
+          <v-btn @click="listRecentActivities" color="info">デストライド可能なアクティビティを取得する</v-btn>
+          <table class="activityList">
+            <tr>
+              <td>Name</td><td>Distance</td><td>Type</td>
+            </tr>
+            <tr v-for="activity in recentActivities" v-bind:key="activity.external_id">
+              <td>{{activity.name}}</td><td>{{activity.average_speed}}</td><td>{{activity.distance/1000}}km</td><td>{{activity.type}}</td>
+            </tr>
+          </table>
+        </div>
+      </div>  
+
+
+
+      <div class="poweredby">
+        <img src="../assets/api_logo_pwrdBy_strava_horiz_light.svg">
+      </div>
     </v-content>
   </v-app>
 </template>
@@ -40,6 +63,7 @@ export default {
     }
     else{
       this.accessToken = this.$route.query.token;
+      this.getStravaAthleteInfo();
     }
   },
   methods: {
@@ -51,7 +75,6 @@ export default {
         }
       })
       .then((response) => {
-        console.log(response);
         this.userdata = response.data;
       })
       .catch((error) => {
@@ -66,7 +89,6 @@ export default {
         }
       })      
       .then((response) => {
-        console.log(response);
         this.recentActivities = response.data;
       })
       .catch((error) => {
@@ -79,3 +101,12 @@ export default {
   }
 }
 </script>
+
+<style>
+  .poweredby {
+    width: 30%;
+    position:fixed;
+    bottom: 0px;
+    right:0px;
+  }
+</style>
