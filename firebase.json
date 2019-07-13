@@ -24,6 +24,10 @@
         "function": "listAthleteActivities"
       },
       {
+        "source": "/api/getSegmentsOfActivity",
+        "function": "getSegmentsOfActivity"
+      },
+      {
         "source": "/stravaAuth",
         "function": "stravaAuth"
       },

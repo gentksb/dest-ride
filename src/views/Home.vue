@@ -19,17 +19,29 @@
         </div>
         <div class="activitylist">
           <v-btn @click="listRecentActivities" color="info">デストライド可能なアクティビティを取得する</v-btn>
+          <h2>最近のアクティビティ</h2>
           <table class="activityList">
             <tr>
               <td>Name</td><td>Distance</td><td>Type</td>
             </tr>
             <tr v-for="activity in recentActivities" v-bind:key="activity.external_id">
-              <td>{{activity.name}}</td><td>{{activity.average_speed}}</td><td>{{activity.distance/1000}}km</td><td>{{activity.type}}</td>
+              <td>{{activity.name}}</td><td>{{activity.average_speed}}</td><td>{{activity.distance/1000}}km</td><td>{{activity.type}}</td><td><v-btn @click="getSegmentsOfActivity(activity.id)">Get Segments</v-btn></td>
             </tr>
           </table>
         </div>
       </div>  
 
+      <div class="destride" v-if="segmentList">
+        <h2>デストライドできるセグメント</h2>
+        <table class="segmentList">
+          <tr>
+            <td>Name</td><td>date</td>
+          </tr>
+          <tr v-for="segment in segmentList" v-bind:key="segment.id">
+            <td>{{segment.name}}</td><td>{{segment.start_date_local}}</td>
+          </tr>
+        </table>
+      </div>
 
 
       <div class="poweredby">
@@ -46,6 +58,13 @@ const API = axios.create({
   baseURL: '/api/'
 })
 
+const destrideSegmentArray = [63488041626];
+
+const isDestrideCourse = (inputSegment) =>{
+  console.log(`判定対象：${inputSegment.id}`)
+  return destrideSegmentArray.includes(inputSegment.id)
+}
+
 export default {
   name: 'Home',
   components: {
@@ -54,7 +73,8 @@ export default {
     return {
       userdata: '',
       recentActivities:{},
-      accessToken: ''
+      accessToken: '',
+      segmentList: ''
     }
   },
   created: function(){
@@ -90,6 +110,21 @@ export default {
       })      
       .then((response) => {
         this.recentActivities = response.data;
+      })
+      .catch((error) => {
+        console.log(error);
+      })
+    },
+    getSegmentsOfActivity: function(activityId){
+      const accessToken = this.accessToken
+      API.get('/getSegmentsOfActivity',{
+        params:{
+          accessToken,
+          activityId
+        }
+      })      
+      .then((response) => {
+        this.segmentList = response.data.filter(isDestrideCourse);
       })
       .catch((error) => {
         console.log(error);

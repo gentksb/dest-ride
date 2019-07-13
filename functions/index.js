@@ -36,13 +36,28 @@ exports.getAthlete = functions.https.onRequest((request, response) => {
   })
 });
 
+exports.getSegmentsOfActivity = functions.https.onRequest((request, response) => {
+  stravaAPI.get(`/activities/${request.query.activityId}`,{
+    headers: makeStravaApiHeader(request.query.accessToken),
+    params: {
+      include_all_efforts: true
+    }
+  })
+  .then((result) => {
+    console.log(result);
+    return response.status(200).send(result.data.segment_efforts);
+  })
+  .catch((error) => {
+    console.log(error);
+  })
+});
+
 exports.listAthleteActivities = functions.https.onRequest((request, response) => {
   stravaAPI.get('/athlete/activities',{
     headers: makeStravaApiHeader(request.query.accessToken),
     params: {
       page:1,
-      per_page:10,
-      access_token: request.query.accessToken
+      per_page:10
     }
   })
   .then((result) => {
