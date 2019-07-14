@@ -94,25 +94,23 @@ exports.deathStride = functions.https.onRequest(async (request, response) => {
       //デストライド処理
       const kingDataRef = await firestore.collection('kingdata').where('segment_id','==', battleSegment);
       const kingsSegment = await kingDataRef.get();
-      kingsSegment.forEach( (kingRecord) => {
+      await kingsSegment.forEach( (kingRecord) => {
         if (challengerSegment[0].elapsed_time < kingRecord.data().elapsed_time){
           deathStrideResult = {
             'result' : 'Win'
           }
-          return response.status(200).send(deathStrideResult)
         } if(challengerSegment[0].elapsed_time > kingRecord.data().elapsed_time){
           deathStrideResult = {
             'result' : 'Lose'
           }
-          return response.status(200).send(deathStrideResult)
         } else{
           console.warn(`king:${kingRecord.data().king_name}(${kingRecord.data().elapsed_time}) vs challenger(${challengerSegment[0].elapsed_time})`)
           deathStrideResult = {
             'result' : 'No Contest'
           }
-          return response.status(200).send(deathStrideResult)
         }
-      });
+      })
+      return response.status(200).send(deathStrideResult);
     }
     catch(error) {
       console.error(error);
@@ -129,6 +127,7 @@ exports.stravaAuth = functions.https.onRequest((request, response) => {
 exports.stravaAuthCallback = functions.https.onRequest(async (request, response) => {
   if(request.query['state'] !== stravaconfig.state){
     console.error('State Unmatch Error')
+    return response.redirect('/')
   }else{
     try {
       const Authentication = await axios.post(stravaconfig.token_url ,{
@@ -138,10 +137,11 @@ exports.stravaAuthCallback = functions.https.onRequest(async (request, response)
         grant_type: 'authorization_code',
         state : stravaconfig.state
       })
-        return response.redirect(`/?token=${Authentication.data.access_token}`);
+      return response.redirect(`/?token=${Authentication.data.access_token}`);
     }
     catch(error){
       console.log(error);
+      return response.redirect('/')
     }
   }
 });
