@@ -24,6 +24,8 @@ const stravaAPI = axios.create({
 // // https://firebase.google.com/docs/functions/write-firebase-functions
 //
 
+//NEXT todo: 超ウルトラコールバック地獄を書き直す
+
 exports.getAthlete = functions.https.onRequest((request, response) => {
   stravaAPI.get('/athlete',{
     headers: makeStravaApiHeader(request.query.accessToken)
