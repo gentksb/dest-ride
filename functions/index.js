@@ -1,9 +1,9 @@
 const functions = require('firebase-functions');
 const firebase =require('firebase')
 const admin = require('firebase-admin');
+admin.initializeApp();
+const firestore = admin.firestore();
 const axios = require('axios');
-const app = admin.initializeApp(functions.config().firebase);
-var db = admin.firestore();
 const stravaconfig = {
   client_id : functions.config().strava.clientid,
   client_secret : functions.config().strava.clientsecret,
@@ -81,35 +81,36 @@ exports.deathStride = functions.https.onRequest((request, response) => {
       include_all_efforts: true
     }
   })
-    .then((result) => {
+    .then(async (result) => {
       let deathStrideResult = {}
       const battleSegment = Number(request.query.segmentId);
       const segment_efforts = result.data.segment_efforts;
       const challengerSegment = segment_efforts.filter(segment_effort => segment_effort.segment.id === battleSegment);
 
       //デストライド処理
-      const kingData = db.collection('kingdata');
-      const getkingRecord = kingData.where('segment_id','==', challengerSegment[0].id).get()
-        .then( kingRecord => {
-          console.log(kingRecord)
-          console.log(`king:${kingRecord.king_name}(${kingRecord.elapsed_time}) vs challenger(${challengerSegment[0].elapsed_time})`)
-
-          if (challengerSegment[0].elapsed_time > kingRecord.elapsed_time){
-            deathStrideResult = {
-              'result' : 'Win'
-            };
-          } if(challengerSegment[0].elapsed_time < kingRecord.elapsed_time){
-            deathStrideResult = {
-              'result' : 'Lose'
+      const kingDataRef = firestore.collection('kingdata').where('segment_id','==', battleSegment);
+      kingDataRef.get()
+        .then( querySnapshot => {
+          querySnapshot.forEach( (kingRecord) => {
+            console.log(kingRecord.data())
+            if (challengerSegment[0].elapsed_time < kingRecord.data().elapsed_time){
+              deathStrideResult = {
+                'result' : 'Win'
+              }
+              return response.status(200).send(deathStrideResult)
+            } if(challengerSegment[0].elapsed_time > kingRecord.data().elapsed_time){
+              deathStrideResult = {
+                'result' : 'Lose'
+              }
+              return response.status(200).send(deathStrideResult)
+            } else{
+              console.warn(`king:${kingRecord.data().king_name}(${kingRecord.data().elapsed_time}) vs challenger(${challengerSegment[0].elapsed_time})`)
+              deathStrideResult = {
+                'result' : 'No Contest'
+              }
+              return response.status(200).send(deathStrideResult)
             }
-          } else{
-            console.warn(`king:${kingRecord.king_name}(${kingRecord.elapsed_time}) vs challenger(${challengerSegment[0].elapsed_time})`)
-            deathStrideResult = {
-              'result' : 'No Contest'
-            }
-          }
-          
-          return response.status(200).send(deathStrideResult)
+          });
         })
         .catch(err=>{
           console.error('FirestoreAccessError:',err)
