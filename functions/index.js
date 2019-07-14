@@ -138,7 +138,6 @@ exports.stravaAuthCallback = functions.https.onRequest(async (request, response)
         grant_type: 'authorization_code',
         state : stravaconfig.state
       })
-      console.log(Authentication.data);
         return response.redirect(`/?token=${Authentication.data.access_token}`);
     }
     catch(error){
