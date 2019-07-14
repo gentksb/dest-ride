@@ -93,66 +93,65 @@ export default {
     }
   },
   methods: {
-    getStravaAthleteInfo: function(){
+    getStravaAthleteInfo: async function(){
       const accessToken = this.accessToken
-      API.get('/Athlete', {
+      try{
+        const getUserdata = await API.get('/Athlete', {
         params: {
           accessToken
         }
       })
-      .then((response) => {
-        this.userdata = response.data;
-      })
-      .catch((error) => {
+        this.userdata = getUserdata.data;
+      }
+      catch(error){
         console.log(error);
-      })
+      }
     },
-    listRecentActivities: function(){
+    listRecentActivities: async function(){
       const accessToken = this.accessToken
-      API.get('/listRecentActivities',{
+      try{
+        const recentActivities = await API.get('/listRecentActivities',{
         params:{
           accessToken
         }
-      })      
-      .then((response) => {
-        this.recentActivities = response.data;
-      })
-      .catch((error) => {
+      }) 
+        this.recentActivities = recentActivities.data;
+      }
+      catch(error){
         console.log(error);
-      })
+      }
     },
-    getSegmentsOfActivity: function(activityId){
+    getSegmentsOfActivity: async function(activityId){
       const accessToken = this.accessToken
-      API.get('/getSegmentsOfActivity',{
+      try {
+        const segmentList = await API.get('/getSegmentsOfActivity',{
         params:{
           accessToken,
           activityId
         }
-      })      
-      .then((response) => {
-        //Todo:filter処理はfunction側に飛ばす
-        this.segmentList = response.data.filter(isDestrideCourse);
       })
-      .catch((error) => {
+        this.segmentList = segmentList.data.filter(isDestrideCourse);
+      }
+      catch(error){
         console.log(error);
-      })
+      }
     },
-    deathStride: function(segmentId,activityId){
+    deathStride: async function(segmentId,activityId){
       const accessToken = this.accessToken
-      API.get('/deathStride',{
+      try{
+        const battleResult = await API.get('/deathStride',{
         params:{
           accessToken,
           segmentId,
           activityId
         }
-      })      
-      .then((response) => {
-        console.log(response.data)
-        this.alartMessage = response.data.result;
       })
-      .catch((error) => {
+        console.log(battleResult.data)
+        this.alartMessage = battleResult.data.result;
+      }
+      catch(error){
         console.log(error);
-      })
+      }
     },
     stravaAuth: function(){
       axios.get('/stravaAuth')
