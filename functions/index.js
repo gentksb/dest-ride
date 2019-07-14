@@ -3,6 +3,7 @@ const firebase =require('firebase')
 const admin = require('firebase-admin');
 const axios = require('axios');
 const app = admin.initializeApp();
+var db = admin.firestore();
 const stravaconfig = {
   client_id : functions.config().strava.clientid,
   client_secret : functions.config().strava.clientsecret,
@@ -82,10 +83,33 @@ exports.deathStride = functions.https.onRequest((request, response) => {
     }
   })
   .then((result) => {
-    const challengersTime = result.data.elapsed_time;
-      //デストライド処理
-    const message = "デストライド完了"
-    return response.status(200).send(message)
+    let deathStrideResult = {}
+    const battleSegment = Number(request.query.segmentId);
+    const segment_efforts = result.data.segment_efforts;
+    const challengerSegment = segment_efforts.filter(segment_effort => segment_effort.segment.id === battleSegment);
+
+    //デストライド処理
+    const kingsData = db.collection('kingdata');
+    const kingRecord = kingsData.where('segment_id','==', result.data.id);
+    
+    console.log(kingRecord)
+    console.log(`king:${kingRecord.king_name}(${kingRecord.elapsed_time}) vs challenger(${challengerSegment.elapsed_time})`)
+
+    if (challengerSegment.elapsed_time > kingRecord.elapsed_time){
+      deathStrideResult = {
+        'result' : 'Win'
+      }
+    } if(challengerSegment.elapsed_time < kingRecord.elapsed_time){
+      deathStrideResult = {
+        'result' : 'Lose'
+      }
+    } else{
+      deathStrideResult = {
+        'result' : 'No Contest'
+      }
+    }
+
+    return response.status(200).send(deathStrideResult)
   })
   .catch((error) => {
     console.log(error);

@@ -38,7 +38,7 @@
             <td>Name</td><td>date</td>
           </tr>
           <tr v-for="segment in segmentList" v-bind:key="segment.id">
-            <td>{{segment.name}}</td><td>{{segment.start_date_local}}</td><td><v-btn @click="deathStride(segment.id,segment.activity.id)">デストライドする</v-btn></td>
+            <td>{{segment.name}}</td><td>{{segment.start_date_local}}</td><td><v-btn @click="deathStride(segment.segment.id,segment.activity.id)">デストライドする</v-btn></td>
           </tr>
         </table>
       </div>
@@ -64,10 +64,10 @@ const API = axios.create({
   baseURL: '/api/'
 })
 
-const destrideSegmentArray = [63488041626];
+const destrideSegmentArray = [10010182];
 
 const isDestrideCourse = (inputSegment) =>{
-  return destrideSegmentArray.includes(inputSegment.id)
+  return destrideSegmentArray.includes(inputSegment.segment.id)
 }
 
 export default {
@@ -130,6 +130,7 @@ export default {
         }
       })      
       .then((response) => {
+        //Todo:filter処理はfunction側に飛ばす
         this.segmentList = response.data.filter(isDestrideCourse);
       })
       .catch((error) => {
@@ -147,7 +148,7 @@ export default {
       })      
       .then((response) => {
         console.log(response.data)
-        this.alartMessage = response.data;
+        this.alartMessage = response.data.result;
       })
       .catch((error) => {
         console.log(error);
