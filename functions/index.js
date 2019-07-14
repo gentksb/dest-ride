@@ -19,6 +19,15 @@ const makeStravaApiHeader = (accessToken) => {
 const stravaAPI = axios.create({
   baseURL: functions.config().strava.apiurl
 })
+const getActivityWithAllSegments = async (activityId,accessToken) =>{
+  const ActivityWithAllSegments = await stravaAPI.get(`/activities/${activityId}`,{
+    headers: makeStravaApiHeader(accessToken),
+    params: {
+      include_all_efforts: true
+    }
+  })
+  return ActivityWithAllSegments.data
+}
 
 // // Create and Deploy Your First Cloud Functions
 // // https://firebase.google.com/docs/functions/write-firebase-functions
@@ -40,14 +49,9 @@ exports.getAthlete = functions.https.onRequest(async (request, response) => {
 
 exports.getSegmentsOfActivity = functions.https.onRequest(async (request, response) => {
   try {
-    const segmentsOfActivity = await stravaAPI.get(`/activities/${request.query.activityId}`,{
-      headers: makeStravaApiHeader(request.query.accessToken),
-      params: {
-        include_all_efforts: true
-      }
-    })
-    console.dir(segmentsOfActivity.data);
-    return response.status(200).send(segmentsOfActivity.data.segment_efforts);
+    const ActivityWithAllSegments = await getActivityWithAllSegments(request.query.activityId,request.query.accessToken)
+    console.dir(ActivityWithAllSegments);
+    return response.status(200).send(ActivityWithAllSegments.segment_efforts);
   }
   catch(error){
     console.error(error);
@@ -76,23 +80,16 @@ exports.listAthleteActivities = functions.https.onRequest(async (request, respon
 exports.deathStride = functions.https.onRequest(async (request, response) => {
     try {
       //ローカルに渡したデータ書き換え対策のため、比較用タイムを再度取得
-      const verifiedActiviry = await stravaAPI.get(`/activities/${request.query.activityId}`,{
-        headers: makeStravaApiHeader(request.query.accessToken),
-        params: {
-          include_all_efforts: true
-        }
-      })
+      const verifiedActiviryWithAllSegments = await getActivityWithAllSegments(request.query.activityId,request.query.accessToken)
       let deathStrideResult = {}
       const battleSegment = Number(request.query.segmentId);
-      const segment_efforts = verifiedActiviry.data.segment_efforts;
+      const segment_efforts = verifiedActiviryWithAllSegments.segment_efforts;
       const challengerSegment = segment_efforts.filter(segment_effort => segment_effort.segment.id === battleSegment);
 
       //デストライド処理
       const kingDataRef = await firestore.collection('kingdata').where('segment_id','==', battleSegment);
       const kingsSegment = await kingDataRef.get();
-      console.log(kingsSegment)
       kingsSegment.forEach( (kingRecord) => {
-        console.log(kingRecord.data())
         if (challengerSegment[0].elapsed_time < kingRecord.data().elapsed_time){
           deathStrideResult = {
             'result' : 'Win'
