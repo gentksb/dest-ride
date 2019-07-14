@@ -2,7 +2,7 @@ const functions = require('firebase-functions');
 const firebase =require('firebase')
 const admin = require('firebase-admin');
 const axios = require('axios');
-const app = admin.initializeApp();
+const app = admin.initializeApp(functions.config().firebase);
 var db = admin.firestore();
 const stravaconfig = {
   client_id : functions.config().strava.clientid,
@@ -20,7 +20,6 @@ const stravaAPI = axios.create({
   baseURL: functions.config().strava.apiurl
 })
 
-
 // // Create and Deploy Your First Cloud Functions
 // // https://firebase.google.com/docs/functions/write-firebase-functions
 //
@@ -34,7 +33,7 @@ exports.getAthlete = functions.https.onRequest((request, response) => {
     return response.status(200).send(result.data);
   })
   .catch((error) => {
-    console.log(error);
+    console.error(error);
     return response.status(500)
   })
 });
@@ -51,7 +50,7 @@ exports.getSegmentsOfActivity = functions.https.onRequest((request, response) =>
     return response.status(200).send(result.data.segment_efforts);
   })
   .catch((error) => {
-    console.log(error);
+    console.error(error);
     return response.status(500)
   })
 });
@@ -69,7 +68,7 @@ exports.listAthleteActivities = functions.https.onRequest((request, response) =>
     return response.status(200).send(result.data);
   })
   .catch((error) => {
-    console.log(error);
+    console.error(error);
     return response.status(500)
   })
 });
@@ -82,40 +81,47 @@ exports.deathStride = functions.https.onRequest((request, response) => {
       include_all_efforts: true
     }
   })
-  .then((result) => {
-    let deathStrideResult = {}
-    const battleSegment = Number(request.query.segmentId);
-    const segment_efforts = result.data.segment_efforts;
-    const challengerSegment = segment_efforts.filter(segment_effort => segment_effort.segment.id === battleSegment);
+    .then((result) => {
+      let deathStrideResult = {}
+      const battleSegment = Number(request.query.segmentId);
+      const segment_efforts = result.data.segment_efforts;
+      const challengerSegment = segment_efforts.filter(segment_effort => segment_effort.segment.id === battleSegment);
 
-    //デストライド処理
-    const kingsData = db.collection('kingdata');
-    const kingRecord = kingsData.where('segment_id','==', result.data.id);
-    
-    console.log(kingRecord)
-    console.log(`king:${kingRecord.king_name}(${kingRecord.elapsed_time}) vs challenger(${challengerSegment.elapsed_time})`)
+      //デストライド処理
+      const kingData = db.collection('kingdata');
+      const getkingRecord = kingData.where('segment_id','==', challengerSegment[0].id).get()
+        .then( kingRecord => {
+          console.log(kingRecord)
+          console.log(`king:${kingRecord.king_name}(${kingRecord.elapsed_time}) vs challenger(${challengerSegment[0].elapsed_time})`)
 
-    if (challengerSegment.elapsed_time > kingRecord.elapsed_time){
-      deathStrideResult = {
-        'result' : 'Win'
-      }
-    } if(challengerSegment.elapsed_time < kingRecord.elapsed_time){
-      deathStrideResult = {
-        'result' : 'Lose'
-      }
-    } else{
-      deathStrideResult = {
-        'result' : 'No Contest'
-      }
-    }
-
-    return response.status(200).send(deathStrideResult)
-  })
-  .catch((error) => {
-    console.log(error);
-    return response.status(500)
-  })
-});
+          if (challengerSegment[0].elapsed_time > kingRecord.elapsed_time){
+            deathStrideResult = {
+              'result' : 'Win'
+            };
+          } if(challengerSegment[0].elapsed_time < kingRecord.elapsed_time){
+            deathStrideResult = {
+              'result' : 'Lose'
+            }
+          } else{
+            console.warn(`king:${kingRecord.king_name}(${kingRecord.elapsed_time}) vs challenger(${challengerSegment[0].elapsed_time})`)
+            deathStrideResult = {
+              'result' : 'No Contest'
+            }
+          }
+          
+          return response.status(200).send(deathStrideResult)
+        })
+        .catch(err=>{
+          console.error('FirestoreAccessError:',err)
+          return response.status(500)
+        })
+      return
+    })
+    .catch((error) => {
+      console.error('AxiosError:',error);
+      return response.status(500)
+    })
+})
 
 
 //API認可
