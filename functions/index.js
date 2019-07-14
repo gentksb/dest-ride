@@ -32,6 +32,10 @@ const getActivityWithAllSegments = async (activityId,accessToken) =>{
 // // Create and Deploy Your First Cloud Functions
 // // https://firebase.google.com/docs/functions/write-firebase-functions
 
+const destrideSegmentArray = [10010182];
+const isDestrideCourse = (inputSegment) =>{
+  return destrideSegmentArray.includes(inputSegment.segment.id)
+}
 
 exports.getAthlete = functions.https.onRequest(async (request, response) => {
   try {
@@ -47,11 +51,12 @@ exports.getAthlete = functions.https.onRequest(async (request, response) => {
   }
 })
 
-exports.getSegmentsOfActivity = functions.https.onRequest(async (request, response) => {
+exports.getDeathStrideSegmentsOfActivity = functions.https.onRequest(async (request, response) => {
   try {
     const ActivityWithAllSegments = await getActivityWithAllSegments(request.query.activityId,request.query.accessToken)
     console.dir(ActivityWithAllSegments);
-    return response.status(200).send(ActivityWithAllSegments.segment_efforts);
+    const destrideSegments = ActivityWithAllSegments.segment_efforts.filter(isDestrideCourse);
+    return response.status(200).send(destrideSegments);
   }
   catch(error){
     console.error(error);

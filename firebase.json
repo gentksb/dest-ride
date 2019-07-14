@@ -24,8 +24,8 @@
         "function": "listAthleteActivities"
       },
       {
-        "source": "/api/getSegmentsOfActivity",
-        "function": "getSegmentsOfActivity"
+        "source": "/api/getDeathStrideSegmentsOfActivity",
+        "function": "getDeathStrideSegmentsOfActivity"
       },
       {
         "source": "/api/deathStride",

@@ -25,7 +25,7 @@
               <td>Name</td><td>Distance</td><td>Type</td>
             </tr>
             <tr v-for="activity in recentActivities" v-bind:key="activity.external_id">
-              <td>{{activity.name}}</td><td>{{activity.average_speed}}</td><td>{{activity.distance/1000}}km</td><td>{{activity.type}}</td><td><v-btn @click="getSegmentsOfActivity(activity.id)">Get Segments</v-btn></td>
+              <td>{{activity.name}}</td><td>{{activity.average_speed}}</td><td>{{activity.distance/1000}}km</td><td>{{activity.type}}</td><td><v-btn @click="getDeathStrideSegmentsOfActivity(activity.id)">Get Segments</v-btn></td>
             </tr>
           </table>
         </div>
@@ -63,12 +63,6 @@ import firebase from 'firebase'
 const API = axios.create({
   baseURL: '/api/'
 })
-
-const destrideSegmentArray = [10010182];
-
-const isDestrideCourse = (inputSegment) =>{
-  return destrideSegmentArray.includes(inputSegment.segment.id)
-}
 
 export default {
   name: 'Home',
@@ -121,16 +115,16 @@ export default {
         console.log(error);
       }
     },
-    getSegmentsOfActivity: async function(activityId){
+    getDeathStrideSegmentsOfActivity: async function(activityId){
       const accessToken = this.accessToken
       try {
-        const segmentList = await API.get('/getSegmentsOfActivity',{
+        const deathStrideSegments = await API.get('/getDeathStrideSegmentsOfActivity',{
         params:{
           accessToken,
           activityId
         }
       })
-        this.segmentList = segmentList.data.filter(isDestrideCourse);
+        this.segmentList = deathStrideSegments.data;
       }
       catch(error){
         console.log(error);
