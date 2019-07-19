@@ -86,7 +86,7 @@ exports.deathStride = functions.https.onRequest(async (request, response) => {
     try {
       //ローカルに渡したデータ書き換え対策のため、比較用タイムを再度取得
       const verifiedActiviryWithAllSegments = await getActivityWithAllSegments(request.query.activityId,request.query.accessToken)
-      let deathStrideResult = {}
+      const deathStrideResult = {}
       const battleSegment = Number(request.query.segmentId);
       const segment_efforts = verifiedActiviryWithAllSegments.segment_efforts;
       const challengerSegment = segment_efforts.filter(segment_effort => segment_effort.segment.id === battleSegment);
@@ -96,18 +96,12 @@ exports.deathStride = functions.https.onRequest(async (request, response) => {
       const kingsSegment = await kingDataRef.get();
       await kingsSegment.forEach( (kingRecord) => {
         if (challengerSegment[0].elapsed_time < kingRecord.data().elapsed_time){
-          deathStrideResult = {
-            'result' : 'Win'
-          }
+          deathStrideResult.result = 'Win'
         } if(challengerSegment[0].elapsed_time > kingRecord.data().elapsed_time){
-          deathStrideResult = {
-            'result' : 'Lose'
-          }
+          deathStrideResult.result = 'Lose'
         } else{
-          console.warn(`king:${kingRecord.data().king_name}(${kingRecord.data().elapsed_time}) vs challenger(${challengerSegment[0].elapsed_time})`)
-          deathStrideResult = {
-            'result' : 'No Contest'
-          }
+          console.warn(`king:${kingRecord.data().king_name}(${kingRecord.data().elapsed_time}) vs challenger(${challengerSegment[0].elapsed_time})`);
+          deathStrideResult.result = 'No contest'
         }
       })
       return response.status(200).send(deathStrideResult);
