@@ -1,11 +1,17 @@
 # destride
 
+## Todo
+
+- 状態管理にVuexストア利用
+- フロントを作る
+- PWAプラグイン追加
+
 ## Project setup
 
 ```powershell
-npm install
+npm ci
 cd ./functions/
-npm install
+npm ci
 ```
 
 ### Compiles and hot-reloads for development
