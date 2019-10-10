@@ -8,7 +8,7 @@
 
 ## Project setup
 
-```powershell
+```bash
 npm ci
 cd ./functions/
 npm ci
@@ -16,33 +16,33 @@ npm ci
 
 ### Compiles and hot-reloads for development
 
-```powershell
+```bash
 npm run serve
 ```
 
 ### Compiles and minifies for production
 
-```powershell
+```bash
 npm run build
 ```
 
 ### Lints and fixes files
 
-```powershell
+```bash
 npm run lint
 ```
 
 ### local test
 
-```powershell
+```bash
 cd ./functions/
-firebase functions:config:get | ac .runtimeconfig.json
+firebase functions:config:get > .runtimeconfig.json
 cd ../
 firebase serve
 ```
 
 ### deploy
 
-```powershell
+```bash
 firebase deploy
 ```
